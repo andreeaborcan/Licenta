@@ -1,13 +1,19 @@
 package UserInterface;
 
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.Building3D;
+
+import java.util.ArrayList;
 
 import javax.xml.bind.annotation.XmlElementDecl;
 
+import ModelComponent.ModelPathComponent;
+import PathFinding.Point;
 import jdk.nashorn.internal.objects.Global;
 
 /**
@@ -19,13 +25,31 @@ public class TouchController3D implements GestureDetector.GestureListener{
     public boolean inBuilding;
 
     public PerspectiveCamera cam;
-    public TouchController3D()
+
+    public Building3D building;
+//    public TouchController3D()
+//    {
+//        inBuilding=false;
+//    }
+    public TouchController3D(Building3D bb)
     {
         inBuilding=false;
+        building = bb;
+        cam = bb.perspectiveCamera;
     }
 
     @Override
     public boolean touchDown(float x,float y, int pointer, int button) {
+        if(building.path.size() == 0) {
+            building.pathFinder.setPosition(building.perspectiveCamera.position);
+            ArrayList<Point> tmp  = building.pathFinder.getPath(building.roomCenters.get("room-name-1"));
+            for (Point p : tmp) {
+                Entity e = new Entity();
+                e.add(new ModelPathComponent(p.pos, p.floor));
+                building.path.add(e);
+            }
+        } else
+            building.path.clear();
 //        cam.position.set(cam.position.x, cam.position.y+10f, cam.position.z);
 //        // ignore if its not left mouse button or first touch pointer
 //        if (button != Input.Buttons.LEFT || pointer > 0) return false;
@@ -69,18 +93,11 @@ public class TouchController3D implements GestureDetector.GestureListener{
 
     @Override
     public boolean longPress(float x, float y) {
-        System.out.println("Heeeelp long press!!!");
-        System.out.println("dir = " + cam.direction);
 //        System.out.println("view = " + cam.view + "]");
         if (!inBuilding)
         {
-
-//            cam.rotate(0,0,0,0);
-//            cam.rotate(cam.up, 15);
-
-//            cam.view.setToRotation(0, 0, 0, 0);
             cam.position.set(8f, cam.position.y - 28f, -11f);
-            cam.fieldOfView = 50;
+            cam.fieldOfView = 80;
             cam.lookAt(5.5f,0f,-11f);
             cam.direction.set(0, 0, -1);
             cam.up.set(0, 1, 0);

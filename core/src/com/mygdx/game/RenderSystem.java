@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import ModelComponent.ModelCameraComponent;
 import ModelComponent.ModelDoorComponent;
 import ModelComponent.ModelFloorComponent;
+import ModelComponent.ModelPathComponent;
 import ModelComponent.ModelWallComponent;
 import ModelComponent.ModelWallDownComponent;
 import ModelComponent.ModelWallUpComponent;
@@ -27,6 +28,8 @@ public class RenderSystem extends EntitySystem {
     private ImmutableArray<Entity> entities;
     private ModelBatch batch;
     private Environment environment;
+    private ArrayList<Entity> path;
+
     public RenderSystem(ModelBatch batch, Environment environment) {
         this.batch = batch;
         this.environment = environment;
@@ -40,6 +43,10 @@ public class RenderSystem extends EntitySystem {
                 ModelWallUpComponent.class,
                 ModelFloorComponent.class,
                 ModelWallDownComponent.class).get());
+    }
+
+    public void setPath(ArrayList<Entity> ae) {
+        path = ae;
     }
 
     public void update(float delta) {
@@ -77,5 +84,13 @@ public class RenderSystem extends EntitySystem {
                 batch.render(mod7.instance, environment);
             }
         }
+
+        if(path != null)
+            for(Entity e : path) {
+                ModelPathComponent mod = e.getComponent(ModelPathComponent.class);
+                if(mod != null) {
+                    batch.render(mod.instance, environment);
+                }
+            }
     }
 }

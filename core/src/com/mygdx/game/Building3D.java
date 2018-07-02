@@ -22,12 +22,18 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import BuildingComponents.Floor;
+import BuildingComponents.Room;
 import ModelComponent.ModelCameraComponent;
+import PathFinding.PathFinder;
+import PathFinding.Point;
 import UserInterface.DirectionButton;
 import UserInterface.MainMenu;
 import UserInterface.MenuButton;
 import UserInterface.MiniMap;
+import UserInterface.RotationButton;
 import UserInterface.TouchController3D;
 
 /**
@@ -37,8 +43,7 @@ import UserInterface.TouchController3D;
 public class Building3D {
 
     private static final float FOV = 67F;
-    public boolean floorChanged = false;
-    int newFloor;
+
     private ModelBatch modelBatch;
     private Environment environment;
     public PerspectiveCamera perspectiveCamera;
@@ -56,7 +61,11 @@ public class Building3D {
 
     private ArrayList<String> roomNames;
     private ArrayList<Integer> floorNumbers;
+    public ArrayList<Entity> path;
     private Licenta lic;
+    public PathFinder pathFinder;
+    public HashMap <String, Point> roomCenters;
+    private RotationButton rot_right, rot_left;
 
     void initStage() {
         ScreenViewport sw=new ScreenViewport();
@@ -76,8 +85,8 @@ public class Building3D {
 
         skin = new Skin();
         FileHandle fileHandle =
-                Gdx.files.internal("uiskin.json");
-        FileHandle atlasFile = fileHandle.sibling("uiskin.atlas");
+                Gdx.files.internal("flat-earth-ui.json");
+        FileHandle atlasFile = fileHandle.sibling("flat-earth-ui.atlas");
         if (atlasFile.exists()) {
             skin.addRegions(new TextureAtlas(atlasFile));
         }
@@ -108,7 +117,8 @@ public class Building3D {
                 (-up.getSprite().getHeight())/2,perspectiveCamera,1f,-1f, engine);
         right=new DirectionButton("right.png",up.getSprite().getWidth(),
                 -up.getSprite().getHeight()/2,perspectiveCamera,-1f,1f, engine);
-
+        rot_left = new RotationButton("rotate_left.png", -220, perspectiveCamera);
+        rot_right = new RotationButton("rotate_right.png", 220, perspectiveCamera);
     }
     private void initBuilding()
     {
@@ -122,26 +132,53 @@ public class Building3D {
         addEntsToEngine(entityFactory.createWindowsEntity());
         addEntsToEngine(entityFactory.createFloorEnts());
         Entity visitor = entityFactory.createVisitorEntity();
+        path = new ArrayList<Entity>();
 
+        initPathFinder();
         roomNames= entityFactory.getRoomNames();
+//        rooms= entityFactory.getRoomes();
+
         floorNumbers= entityFactory.getFloorNumbers();
         System.out.println("before " + engine.getEntities().size());
         addEntityToEngine(visitor);
-        System.out.println("after " + engine.getEntities().size());
-        System.out.println("visitor has " + visitor.getComponents().get(0).getClass());
-        System.out.println("modelcamera comps este egal cu - " + engine.getEntitiesFor(Family.one(ModelCameraComponent.class).get()).size());
-        System.out.println("ultimul are clasa: " + engine.getEntities().get(engine.getEntities().size() - 1).getComponents().get(0).getClass());
+//        System.out.println("after " + engine.getEntities().size());
+//        System.out.println("visitor has " + visitor.getComponents().get(0).getClass());
+//        System.out.println("modelcamera comps este egal cu - " + engine.getEntitiesFor(Family.one(ModelCameraComponent.class).get()).size());
+//        System.out.println("ultimul are clasa: " + engine.getEntities().get(engine.getEntities().size() - 1).getComponents().get(0).getClass());
 
         initModelBatch();
         initEnvironment();
-        engine.addSystem(new RenderSystem(modelBatch, environment));
+        initRoomCenters();
+
+
+        RenderSystem rs = new RenderSystem(modelBatch, environment);
+        rs.setPath(path);
+        engine.addSystem(rs);
+
     }
+
+    private void initRoomCenters() {
+        roomCenters = new HashMap<String, Point>();
+        for(int i = 0; i < entityFactory.floors.size(); i++) {
+            for(Room r : entityFactory.floors.get(i).getRooms()) {
+                roomCenters.put(r.getRoomName(), new Point(i, r.getRoomCenter()));
+            }
+        }
+    }
+
+    private void initPathFinder() {
+        pathFinder = new PathFinder();
+        pathFinder.init(entityFactory.floors);
+    }
+    
     private void addActors(Stage stage){
         stage.addActor(a);
         stage.addActor(up);
         stage.addActor(down);
         stage.addActor(left);
         stage.addActor(right);
+        stage.addActor(rot_right);
+        stage.addActor(rot_left);
         stage.addActor(menu);
         stage.addActor(miniMap);
 
@@ -158,7 +195,7 @@ public class Building3D {
         perspectiveCamera.near = 1f;
         perspectiveCamera.far = 300f;
         perspectiveCamera.update();
-        touch=new TouchController3D();
+        touch=new TouchController3D(this);
         touch.cam=perspectiveCamera;
         gd=new GestureDetector(touch);
         gd.setLongPressSeconds(0.2f);

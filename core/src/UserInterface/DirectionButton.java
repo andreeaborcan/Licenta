@@ -90,15 +90,15 @@ public class DirectionButton extends Actor {
                 dx /= 2;
                 dz /= 2;
                 if(camx * camy < 0 ) {
-                    float yy = pc.position.y;
-                    while(yy > 99f) yy -= 100f;
-                    if(yy < 20f) {
-                        if(camy == -1)
-                            pc.rotate(15, 0f,(float) Math.toRadians(15f),0f);
-                        else
-                            pc.rotate(-15, 0f,(float) Math.toRadians(15f),0f);
-                        return;
-                    }
+//                    float yy = pc.position.y;
+//                    while(yy > 99f) yy -= 100f;
+//                    if(yy < 20f) {
+//                        if(camy == -1)
+//                            pc.rotate(15, 0f,(float) Math.toRadians(15f),0f);
+//                        else
+//                            pc.rotate(-15, 0f,(float) Math.toRadians(15f),0f);
+//                        return;
+//                    }
                     targetX = pc.position.x + camx * dz;
                     targetZ = pc.position.z + camy * dx;
 

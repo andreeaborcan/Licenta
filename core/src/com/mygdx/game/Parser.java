@@ -23,7 +23,7 @@ import UserInterface.MiniMapImageGenerator;
  */
 public class Parser {
 
-    private ArrayList<Floor> floors;
+    public ArrayList<Floor> floors;
     private  ArrayList<Wall> walls;
     private  ArrayList<Wall> wallsDown;
     private  ArrayList<Wall> wallsUp;

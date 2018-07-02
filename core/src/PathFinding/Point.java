@@ -7,11 +7,11 @@ import org.lwjgl.util.vector.Vector2f;
  */
 
 public class Point {
-    int floor;
-    Vector2f pos;
+    public int floor;
+    public Vector2f pos;
 
     Point() {}
-    Point(int fl, Vector2f v) {
+    public Point(int fl, Vector2f v) {
         floor = fl;
         pos = new Vector2f(v);
     }

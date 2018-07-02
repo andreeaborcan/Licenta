@@ -37,7 +37,7 @@ public class EntityFactory {
     public ArrayList<Entity> WallsDownEntity;
     public ArrayList<Entity> WallsUpEntity;
     public ArrayList<Entity> pathEntity, floorEntity;
-    private ArrayList<Floor> floors;
+    public ArrayList<Floor> floors;
     public Entity visitor;
     private  Model playerModel;
     private Texture playerTexture;
@@ -59,6 +59,10 @@ public class EntityFactory {
         currentFloor = floorNumbers.get(0);
         currentFloorIndex = floorNumbers.indexOf(currentFloor);
         initialize();
+    }
+
+    public ArrayList<Room> getRooms() {
+        return null;
     }
 
     public void setFloor(int i){
